@@ -276,6 +276,40 @@ uint16_t mode_random_color(void) {
 }
 static const char _data_FX_MODE_RANDOM_COLOR[] PROGMEM = "Random Colors@!,Fade time;;!;01";
 
+uint16_t mode_flashy_hazards(void) {
+  uint8_t brightness = SEGMENT.intensity;               // Use intensity slider to control brightness
+  uint32_t color1 = SEGCOLOR(0);                        // Primary color (yellow)
+  uint32_t color2 = SEGCOLOR(1);                        // Secondary color (white)
+
+  // Determine current time in the flashing sequence
+  uint32_t currentTime = millis() % 6000; // 6-second cycle: 4s slow, 2s fast
+
+  // Set flashing interval based on current time within the cycle
+  uint16_t flashInterval;
+  if (currentTime < 4000) {             // First 4 seconds: slower back-and-forth (0.25s)
+    flashInterval = 250;
+  } else {                              // Last 2 seconds: faster back-and-forth (0.1s)
+    flashInterval = 100;
+  }
+
+  // Determine flash state based on flash interval
+  bool isFlashOn = (currentTime / flashInterval) % 2 == 0;
+
+  // Apply pattern to each segment based on flash state
+  for (int i = 0; i < SEGLEN; i++) {
+    // Flash left and right segments in an alternating pattern
+    SEGMENT.setPixelColor(i, isFlashOn ? color1 : color2);             // Left segment (first 102 LEDs)
+    //SEGMENT.setPixelColor(i + 102, !isFlashOn ? color1 : color2);      // Right segment (next 102 LEDs)
+  }
+
+  return FRAMETIME; // Controls the frame rate for smooth animation
+}
+
+
+static const char _data_FX_MODE_FLASHY_HAZARDS[] PROGMEM = "Dynamic Hazards@Speed,Intensity,,Cycle Time;;!;1;sx=100,ix=150,m12=1";
+
+
+
 
 /*
  * Lights every LED in a random color. Changes all LED at the same time
@@ -7820,6 +7854,10 @@ void WS2812FX::setupEffectData() {
   }
   // now replace all pre-allocated effects
   // --- 1D non-audio effects ---
+  
+  // My custom FXs
+  addEffect(FX_MODE_FLASHY_HAZARDS, &mode_flashy_hazards, _data_FX_MODE_FLASHY_HAZARDS);
+
   addEffect(FX_MODE_BLINK, &mode_blink, _data_FX_MODE_BLINK);
   addEffect(FX_MODE_BREATH, &mode_breath, _data_FX_MODE_BREATH);
   addEffect(FX_MODE_COLOR_WIPE, &mode_color_wipe, _data_FX_MODE_COLOR_WIPE);

@@ -9,6 +9,9 @@
  * || || ||
  * \/ \/ \/
  */
+
+#include "../usermods/Hazards_Interrupt/hazards_interrupt.h"
+
 //#include "../usermods/EXAMPLE_v2/usermod_v2_example.h"
 
 #ifdef USERMOD_BATTERY
@@ -250,6 +253,8 @@ void registerUsermods()
    * \/ \/ \/
    */
   //UsermodManager::add(new MyExampleUsermod());
+
+  UsermodManager::add(new HazardsInterrupt());
 
   #ifdef USERMOD_BATTERY
   UsermodManager::add(new UsermodBattery());

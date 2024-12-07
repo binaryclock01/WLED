@@ -121,10 +121,13 @@ bool isButtonPressed(uint8_t i)
   return false;
 }
 
+
+
 void handleSwitch(uint8_t b)
 {
   // isButtonPressed() handles inverted/noninverted logic
-  if (buttonPressedBefore[b] != isButtonPressed(b)) {
+  if (buttonPressedBefore[b] != isButtonPressed(b))
+  {
     DEBUG_PRINTF_P(PSTR("Switch: State changed %u\n"), b);
     buttonPressedTime[b] = millis();
     buttonPressedBefore[b] = !buttonPressedBefore[b];
@@ -132,19 +135,31 @@ void handleSwitch(uint8_t b)
 
   if (buttonLongPressed[b] == buttonPressedBefore[b]) return;
 
-  if (millis() - buttonPressedTime[b] > WLED_DEBOUNCE_THRESHOLD) { //fire edge event only after 50ms without change (debounce)
+  if (millis() - buttonPressedTime[b] > WLED_DEBOUNCE_THRESHOLD)
+  { //fire edge event only after 50ms without change (debounce)
     DEBUG_PRINTF_P(PSTR("Switch: Activating  %u\n"), b);
-    if (!buttonPressedBefore[b]) { // on -> off
+    if (!buttonPressedBefore[b])
+    { // on -> off
       DEBUG_PRINTF_P(PSTR("Switch: On -> Off (%u)\n"), b);
-      if (macroButton[b]) applyPreset(macroButton[b], CALL_MODE_BUTTON_PRESET);
+      if (macroButton[b]) 
+        applyPreset(macroButton[b], CALL_MODE_BUTTON_PRESET);
       else { //turn on
-        if (!bri) {toggleOnOff(); stateUpdated(CALL_MODE_BUTTON);}
+        if (!bri) {
+          toggleOnOff();
+          stateUpdated(CALL_MODE_BUTTON);
+        }
       }
     } else {  // off -> on
       DEBUG_PRINTF_P(PSTR("Switch: Off -> On (%u)\n"), b);
-      if (macroLongPress[b]) applyPreset(macroLongPress[b], CALL_MODE_BUTTON_PRESET);
-      else { //turn off
-        if (bri) {toggleOnOff(); stateUpdated(CALL_MODE_BUTTON);}
+      if (macroLongPress[b])
+        applyPreset(macroLongPress[b], CALL_MODE_BUTTON_PRESET);
+      else
+      { //turn off
+        if (bri)
+        {
+          toggleOnOff();
+          stateUpdated(CALL_MODE_BUTTON);
+        }
       }
     }
 

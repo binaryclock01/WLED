@@ -231,6 +231,10 @@
 #define FX_MODE_TV_SIMULATOR           116
 #define FX_MODE_DYNAMIC_SMOOTH         117 // candidate for removal (check3 in dynamic)
 
+// my custom FXs
+
+#define FX_MODE_FLASHY_HAZARDS         200
+
 // new 0.14 2D effects
 #define FX_MODE_2DSPACESHIPS           118 //gap fill
 #define FX_MODE_2DCRAZYBEES            119 //gap fill

@@ -141,6 +141,16 @@ void applyPresetWithFallback(uint8_t index, uint8_t callMode, uint8_t effectID, 
   effectPalette = paletteID;
 }
 
+void changePresetState(uint16_t newPreset)
+{
+  // don't request a preset change if its already on that preset!
+  if (newPreset == currentPreset)
+    return;
+  else
+    presetToApply = newPreset;
+  return;
+}
+
 void handlePresets()
 {
   byte presetErrFlag = ERR_NONE;
@@ -151,7 +161,46 @@ void handlePresets()
     return;
   }
 
-  if (presetToApply == 0 || !requestJSONBufferLock(9)) return; // no preset waiting to apply, or JSON buffer is already allocated, return to loop until free
+  if ((presetToApply == 0) || !requestJSONBufferLock(9))
+    return; // no preset waiting to apply, or JSON buffer is already allocated, return to loop until free
+
+#define BUTTON_TURN_SIGNAL_LEFT 2
+#define BUTTON_TURN_SIGNAL_RIGHT 3
+#define BUTTON_BRAKING 1
+#define BUTTON COURTESY 4
+
+#define PRESET_HAZARDS 14
+#define PRESET_LEFT_TURN 6
+#define PRESET_RIGHT_TURN 5
+#define PRESET_BRAKING 11
+#define PRESET_BRAKING_WITH_LEFT_TURN  13
+#define PRESET_BRAKING_WITH_RIGHT_TURN 15
+#define PRESET_CRUISE 101
+
+
+  // Check if both turn signal buttons are pressed
+  bool leftPressed = (isButtonPressed(BUTTON_TURN_SIGNAL_LEFT) && buttonPressedBefore[BUTTON_TURN_SIGNAL_LEFT]);
+  bool rightPressed = (isButtonPressed(BUTTON_TURN_SIGNAL_RIGHT) && buttonPressedBefore[BUTTON_TURN_SIGNAL_RIGHT]);
+  bool brakePressed = (isButtonPressed(BUTTON_BRAKING) && buttonPressedBefore[BUTTON_BRAKING]);
+
+  // check for hazards
+  if (leftPressed && rightPressed)
+  {
+    // Activate hazards effect (both turn signals on)
+    presetToApply = PRESET_HAZARDS;
+  }
+  else
+  {
+    // check turn signals and braking
+    if (leftPressed)
+      presetToApply = ( brakePressed ? PRESET_BRAKING_WITH_LEFT_TURN : PRESET_LEFT_TURN );
+    else if (rightPressed)
+      presetToApply = ( brakePressed ? PRESET_BRAKING_WITH_RIGHT_TURN : PRESET_RIGHT_TURN );
+    else if (brakePressed && (currentPreset != PRESET_BRAKING))
+      presetToApply = PRESET_BRAKING;
+    else if (currentPreset != PRESET_CRUISE)
+      presetToApply = PRESET_CRUISE;
+  }
 
   bool changePreset = false;
   uint8_t tmpPreset = presetToApply; // store temporary since deserializeState() may call applyPreset()
